@@ -2,6 +2,7 @@ package com.hello.impl
 
 import java.io.Closeable
 import java.net.{InetAddress, URI}
+import java.util.Optional
 
 import com.lightbend.lagom.scaladsl.api.{Descriptor, ServiceLocator}
 import com.typesafe.config.ConfigException.BadValue
@@ -111,8 +112,8 @@ class ZooKeeperServiceLocator(serverHostname: String,
     CuratorFrameworkFactory.newClient(zkUri, new ExponentialBackoffRetry(1000, 3))
   zkClient.start()
 
-  val devModeServiceLocatorUrl = URI.create("localhost:8000")
-
+  //  groupkt.com/country/get/all
+  val devModeServiceLocatorUrl = URI.create("http://groupkt.com")
 
   private val serviceDiscovery: ServiceDiscovery[String] =
     ServiceDiscoveryBuilder
@@ -126,7 +127,6 @@ class ZooKeeperServiceLocator(serverHostname: String,
 
   private def locateAsScala(name: String): Future[Option[URI]] = {
     val instances: List[ServiceInstance[String]] = serviceDiscovery.queryForInstances(name).asScala.toList
-    println(name, instances)
     Future {
       instances.size match {
         case 0 => None
@@ -184,6 +184,12 @@ class ZooKeeperServiceLocator(serverHostname: String,
                                (implicit ec: ExecutionContext): Future[Option[T]] = {
 
     block(devModeServiceLocatorUrl).map(Some.apply)
+
+    //    locateAsScala(name).flatMap(optURI =>
+    //      optURI.fold(Future.successful(Option[URI]))(uri => block(uri).map(Some.apply)
+    //      )
+
+//    locateAsScala(name).map(uri => block(uri.get).map(Some.apply))
   }
 
 

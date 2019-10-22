@@ -1,6 +1,6 @@
 package com.hello.impl
 
-import com.hello.api.HelloService
+import com.hello.api.{ExternalService, HelloService}
 import com.lightbend.lagom.scaladsl.api.ServiceLocator
 import com.lightbend.lagom.scaladsl.server._
 import com.softwaremill.macwire._
@@ -44,7 +44,9 @@ class HelloLoader extends LagomApplicationLoader {
       val locator = new ZooKeeperServiceLocator(testConfig())
       val registry = new ZooKeeperServiceRegistry(s"$serverhost:$serverport", defaultZKServicesPath)
       registry.start()
-      registry.register(newServiceInstance("hello2", "1", 3000))
+      registry.register(newServiceInstance("hello", "1", 3000))
+      registry.register(newServiceInstance("external-service", "2", 80))
+
       override def serviceLocator: ServiceLocator = locator
     }
     application
@@ -55,7 +57,9 @@ class HelloLoader extends LagomApplicationLoader {
       val locator = new ZooKeeperServiceLocator(testConfig())
       val registry = new ZooKeeperServiceRegistry(s"$serverhost:$serverport", defaultZKServicesPath)
       registry.start()
-      registry.register(newServiceInstance("hello2", "1", 3000))
+      registry.register(newServiceInstance("hello", "1", 3000))
+      registry.register(newServiceInstance("external-service", "2", 80))
+
       override def serviceLocator: ServiceLocator = locator
     }
     application
@@ -70,5 +74,8 @@ abstract class HelloApplication(context: LagomApplicationContext)
 
   // Bind the service that this server provides
   override lazy val lagomServer: LagomServer = serverFor[HelloService](wire[HelloServiceImpl])
+
+  lazy val externalService = serviceClient.implement[ExternalService]
+
 
 }
